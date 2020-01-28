@@ -1,0 +1,47 @@
+#
+# builder image
+#
+FROM golang:1.13-alpine3.11 as builder
+RUN mkdir -p /build/src
+
+# make sure git and glide packages are present
+RUN apk update \
+	&& apk add --update git \
+	&& apk add --update openssh \
+	&& apk add --update glide
+
+# standard golang env setup
+ENV GOPATH=/build
+ENV GOBIN=/usr/local/go/bin
+WORKDIR $GOPATH/src
+
+# get main project from git
+RUN git clone https://github.com/fabianlee/go-vendortest1.git \
+	&& ls /build/src \
+	&& ls /build/src/go-vendortest1
+WORKDIR $GOPATH/src/go-vendortest1/vendortest
+
+# by default, use git HEAD of external package "go-myutil"
+ARG BRANCH=HEAD
+# fetch dependencies using glide package manager
+RUN glide init --non-interactive \
+	&& echo "  version: $BRANCH" >> glide.yaml \
+	&& cat glide.yaml \
+	&& glide up && glide install
+
+# compile, place executable into /build
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o out . && cp out $GOPATH/.
+
+# intermediate executable
+CMD [ "/build/out" ]
+
+
+#
+# generate clean, final image for end users
+#
+FROM alpine:3.11.3
+# copy golang binary into container
+COPY --from=builder /build/out .
+# executable
+CMD [ "./out" ]
+
