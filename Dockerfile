@@ -18,7 +18,6 @@ WORKDIR $GOPATH/src
 
 # get main project from git
 RUN git clone https://github.com/fabianlee/go-vendortest1.git \
-	&& ls /build/src \
 	&& ls /build/src/go-vendortest1
 WORKDIR $GOPATH/src/go-vendortest1/vendortest
 
