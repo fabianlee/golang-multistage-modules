@@ -14,7 +14,7 @@ RUN apk update \
 ENV GOPATH=/build
 ENV GOBIN=/usr/local/go/bin
 # turn off new module support (pkg mgmt)
-ENv GO111MODULE=off
+ENV GO111MODULE=off
 WORKDIR $GOPATH/src
 
 # get main project from git

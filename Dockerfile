@@ -13,7 +13,7 @@ RUN apk update \
 ENV GOPATH=/build
 ENV GOBIN=/usr/local/go/bin
 # enable new package management
-ENv GO111MODULE=on
+ENV GO111MODULE=on
 WORKDIR $GOPATH/src
 
 # get main project from git
