@@ -1,5 +1,5 @@
 OWNER := fabianlee
-PROJECT := golang-multistage-glide
+PROJECT := golang-multistage-modules
 VERSION := 1.0.0
 OPV := $(OWNER)/$(PROJECT):$(VERSION)
 
