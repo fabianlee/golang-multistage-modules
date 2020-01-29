@@ -12,7 +12,7 @@ RUN apk update \
 # standard golang env setup
 ENV GOPATH=/build
 ENV GOBIN=/usr/local/go/bin
-# enable new package management
+# enable module support (package management)
 ENV GO111MODULE=on
 WORKDIR $GOPATH/src
 
