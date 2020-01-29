@@ -7,13 +7,14 @@ RUN mkdir -p /build/src
 # make sure git and glide packages are present
 RUN apk update \
 	&& apk add --update git \
-	&& apk add --update openssh
+	&& apk add --update openssh \
+	&& apk add --update glide
 
 # standard golang env setup
 ENV GOPATH=/build
 ENV GOBIN=/usr/local/go/bin
-# enable new package management
-ENv GO111MODULE=on
+# turn off new module support (pkg mgmt)
+ENv GO111MODULE=off
 WORKDIR $GOPATH/src
 
 # get main project from git
@@ -22,13 +23,22 @@ RUN git clone https://github.com/fabianlee/go-vendortest1.git \
 	&& ls /build/src/go-vendortest1
 WORKDIR $GOPATH/src/go-vendortest1/vendortest
 
-# compile, place executable into /build
 # by default, use git HEAD of external package "go-myutil"
 ARG BRANCH=HEAD
-RUN go mod init \
-	&& go get github.com/fabianlee/go-myutil@$BRANCH \
-	&& go list -m all \
-	&& CGO_ENABLED=0 GOOS=linux go build -a -o out . \
+# fetch dependencies using glide package manager
+RUN glide init --non-interactive \
+	&& echo "  version: $BRANCH" >> glide.yaml \
+	&& cat glide.yaml \
+	&& glide up \
+	&& glide install
+# fetch dependencies using dep (vendor subdirectory as well as /build/pkg/dep/sources
+#RUN dep init -v \
+#	&& dep status \
+#	&& dep ensure -update
+
+
+# compile, place executable into /build
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o out . \
 	&& cp out $GOPATH/.
 
 # intermediate executable
